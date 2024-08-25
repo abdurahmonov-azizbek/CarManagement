@@ -25,6 +25,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using CarManagement.Api.Services.Foundations.Authorizations;
+using CarManagement.Api.Services.Foundations.Authorizations.Models;
 
 namespace CarManagement.Api
 {
@@ -52,15 +54,40 @@ namespace CarManagement.Api
                 });
             });
 
-            services.AddSwaggerGen(config =>
+            services.AddSwaggerGen(options =>
             {
-                config.SwaggerDoc(
-                    name: "v1",
-                    info: new OpenApiInfo { Title = "CarManagement.Api", Version = "v1" });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    In = ParameterLocation.Header,
+                    Description = "Enter valid token"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                    Array.Empty<string>()
+                    }
+                });
             });
 
+            AddSettingModels(services);
             AddBrokers(services);
             AddFoundationServices(services);
+        }
+
+        private void AddSettingModels(IServiceCollection services)
+        {
+            services.Configure<JwtSettings>(this.Configuration.GetSection(nameof(JwtSettings)));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
@@ -91,19 +118,19 @@ namespace CarManagement.Api
 
         private static void AddFoundationServices(IServiceCollection services)
         {
-			services.AddTransient<IAddressService, AddressService>();
-			services.AddTransient<ICarService, CarService>();
-			services.AddTransient<ICarModelService, CarModelService>();
-			services.AddTransient<ICarTypeService, CarTypeService>();
-			services.AddTransient<ICategoryService, CategoryService>();
-			services.AddTransient<IDriverLicenseService, DriverLicenseService>();
-			services.AddTransient<IOfferService, OfferService>();
-			services.AddTransient<IOfferTypeService, OfferTypeService>();
-			services.AddTransient<IPenaltyService, PenaltyService>();
-			services.AddTransient<IServiceService, ServiceService>();
-			services.AddTransient<IServiceTypeService, ServiceTypeService>();
-			services.AddTransient<IUserService, UserService>();
-
+            services.AddTransient<IAddressService, AddressService>();
+            services.AddTransient<ICarService, CarService>();
+            services.AddTransient<ICarModelService, CarModelService>();
+            services.AddTransient<ICarTypeService, CarTypeService>();
+            services.AddTransient<ICategoryService, CategoryService>();
+            services.AddTransient<IDriverLicenseService, DriverLicenseService>();
+            services.AddTransient<IOfferService, OfferService>();
+            services.AddTransient<IOfferTypeService, OfferTypeService>();
+            services.AddTransient<IPenaltyService, PenaltyService>();
+            services.AddTransient<IServiceService, ServiceService>();
+            services.AddTransient<IServiceTypeService, ServiceTypeService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IAccessTokenGeneratorService, AccessTokenGeneratorService>();
         }
     }
 }
