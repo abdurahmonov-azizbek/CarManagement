@@ -28,6 +28,7 @@ using Microsoft.OpenApi.Models;
 using CarManagement.Api.Services.Foundations.Authorizations;
 using CarManagement.Api.Services.Foundations.Authorizations.Models;
 using CarManagement.Api.Services.Foundations.Security;
+using CarManagement.Api.Services.Orchestrations.Auth;
 
 namespace CarManagement.Api
 {
@@ -84,6 +85,7 @@ namespace CarManagement.Api
             AddSettingModels(services);
             AddBrokers(services);
             AddFoundationServices(services);
+            AddOrchestrationServices(services);
         }
 
         private void AddSettingModels(IServiceCollection services)
@@ -133,6 +135,11 @@ namespace CarManagement.Api
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAccessTokenGeneratorService, AccessTokenGeneratorService>();
             services.AddTransient<IPasswordHasherService, PasswordHasherService>();
+        }
+
+        private void AddOrchestrationServices(IServiceCollection services)
+        {
+            services.AddTransient<IAuthService, AuthService>();
         }
     }
 }
