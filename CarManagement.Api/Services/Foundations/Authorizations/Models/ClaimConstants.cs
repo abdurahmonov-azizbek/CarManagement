@@ -13,5 +13,6 @@ namespace CarManagement.Api.Services.Foundations.Authorizations.Models
         public const string LastName = "LastName";
         public const string Job = "Job";
         public const string Password = "Password";
+        public const string Role = "Role";
     }
 }

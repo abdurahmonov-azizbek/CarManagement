@@ -29,6 +29,9 @@ using CarManagement.Api.Services.Foundations.Authorizations;
 using CarManagement.Api.Services.Foundations.Authorizations.Models;
 using CarManagement.Api.Services.Foundations.Security;
 using CarManagement.Api.Services.Orchestrations.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace CarManagement.Api
 {
@@ -56,6 +59,30 @@ namespace CarManagement.Api
                 });
             });
 
+            services.Configure<JwtSettings>(this.Configuration.GetSection(nameof(JwtSettings)));
+
+            var jwtSettings = this.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>()
+                ?? throw new InvalidOperationException("Jwt settings model is not configured!");
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = jwtSettings.ValidateIssuer,
+                        ValidIssuer = jwtSettings.ValidIssuer,
+                        ValidateAudience = jwtSettings.ValidateAudience,
+                        ValidAudience = jwtSettings.ValidAudience,
+                        ValidateLifetime = jwtSettings.ValidateLifeTime,
+                        ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                    };
+                });
+
+            services.AddAuthorization();
+
             services.AddSwaggerGen(options =>
             {
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -82,15 +109,9 @@ namespace CarManagement.Api
                 });
             });
 
-            AddSettingModels(services);
             AddBrokers(services);
             AddFoundationServices(services);
             AddOrchestrationServices(services);
-        }
-
-        private void AddSettingModels(IServiceCollection services)
-        {
-            services.Configure<JwtSettings>(this.Configuration.GetSection(nameof(JwtSettings)));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
@@ -108,6 +129,7 @@ namespace CarManagement.Api
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("MyPolicy");
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }

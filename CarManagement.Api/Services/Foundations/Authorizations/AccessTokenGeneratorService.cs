@@ -49,6 +49,7 @@ namespace CarManagement.Api.Services.Foundations.Authorizations
                 new Claim(ClaimConstants.FirstName, user.FirstName),
                 new Claim(ClaimConstants.LastName, user.LastName),
                 new Claim(ClaimConstants.Job, user.Job),
+                new Claim(ClaimConstants.Role, user.Role.ToString())
             };
     }
 }
