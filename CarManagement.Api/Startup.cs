@@ -27,6 +27,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using CarManagement.Api.Services.Foundations.Authorizations;
 using CarManagement.Api.Services.Foundations.Authorizations.Models;
+using CarManagement.Api.Services.Foundations.Security;
 
 namespace CarManagement.Api
 {
@@ -131,6 +132,7 @@ namespace CarManagement.Api
             services.AddTransient<IServiceTypeService, ServiceTypeService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAccessTokenGeneratorService, AccessTokenGeneratorService>();
+            services.AddTransient<IPasswordHasherService, PasswordHasherService>();
         }
     }
 }
