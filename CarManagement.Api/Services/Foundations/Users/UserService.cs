@@ -10,6 +10,7 @@ using CarManagement.Api.Brokers.DateTimes;
 using CarManagement.Api.Brokers.Loggings;
 using CarManagement.Api.Brokers.Storages;
 using CarManagement.Api.Models.Users;
+using CarManagement.Api.Services.Foundations.Security;
 
 namespace CarManagement.Api.Services.Foundations.Users
 {
@@ -19,22 +20,27 @@ namespace CarManagement.Api.Services.Foundations.Users
         private readonly IStorageBroker storageBroker;
         private readonly IDateTimeBroker dateTimeBroker;
         private readonly ILoggingBroker loggingBroker;
+        private readonly IPasswordHasherService passwordHasherService;
 
         public UserService(
             IStorageBroker storageBroker,
             IDateTimeBroker dateTimeBroker,
-            ILoggingBroker loggingBroker)
+            ILoggingBroker loggingBroker,
+            IPasswordHasherService passwordHasherService)
 
         {
             this.storageBroker = storageBroker;
             this.dateTimeBroker = dateTimeBroker;
             this.loggingBroker = loggingBroker;
+            this.passwordHasherService = passwordHasherService;
         }
 
         public ValueTask<User> AddUserAsync(User user) =>
         TryCatch(async () =>
         {
             ValidateUserOnAdd(user);
+
+            user.Password = passwordHasherService.HashPassword(user.Password);
 
             return await this.storageBroker.InsertUserAsync(user);
         });
@@ -64,6 +70,8 @@ namespace CarManagement.Api.Services.Foundations.Users
                     await this.storageBroker.SelectUserByIdAsync(user.Id);
 
                 ValidateAgainstStorageUserOnModify(inputUser: user, storageUser: maybeUser);
+
+                user.Password = this.passwordHasherService.HashPassword(user.Password);
 
                 return await this.storageBroker.UpdateUserAsync(user);
             });
