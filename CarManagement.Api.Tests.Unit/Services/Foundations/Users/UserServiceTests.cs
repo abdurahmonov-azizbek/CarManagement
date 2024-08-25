@@ -36,7 +36,7 @@ namespace CarManagement.Api.Tests.Unit.Services.Foundations.Users
             this.userService = new UserService(
                 storageBroker: this.storageBrokerMock.Object,
                 dateTimeBroker: this.dateTimeBrokerMock.Object,
-                loggingBroker: this.loggingBrokerMock.Object);
+                loggingBroker: this.loggingBrokerMock.Object, default);
         }
 
         public static TheoryData<int> InvalidMinutes()
